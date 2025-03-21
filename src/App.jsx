@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route, Link, NavLink, Navigate } from "react-router-dom";
+import React, { useState, useEffect, useCallback } from "react";
+import { BrowserRouter as Router, Routes, Route, NavLink, Navigate, useNavigate } from "react-router-dom";
 import "./App.css";
 import "./auth.css";
 import Home from "./Home";
@@ -11,10 +11,11 @@ import CompanyList from "./MyArray";
 
 // Protected route component
 const ProtectedRoute = ({ children }) => {
-  const isLoggedIn = JSON.parse(localStorage.getItem("currentUser"))?.isLoggedIn || false;
+  const isAuthenticated = localStorage.getItem("currentUser") ? 
+    JSON.parse(localStorage.getItem("currentUser")).isLoggedIn : false;
   
-  if (!isLoggedIn) {
-    return <Navigate to="/login" />;
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
   }
   
   return children;
@@ -22,17 +23,47 @@ const ProtectedRoute = ({ children }) => {
 
 const App = () => {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [loggedIn, setLoggedIn] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [username, setUsername] = useState("");
 
-  useEffect(() => {
-    // Check if user is logged in
-    const currentUser = JSON.parse(localStorage.getItem("currentUser"));
-    if (currentUser && currentUser.isLoggedIn) {
-      setLoggedIn(true);
-      setUsername(currentUser.username);
+  // Check authentication status
+  const checkAuth = useCallback(() => {
+    try {
+      const userString = localStorage.getItem("currentUser");
+      if (userString) {
+        const user = JSON.parse(userString);
+        setIsAuthenticated(user.isLoggedIn === true);
+        setUsername(user.username || "");
+      } else {
+        setIsAuthenticated(false);
+        setUsername("");
+      }
+    } catch (error) {
+      console.error("Error checking authentication:", error);
+      setIsAuthenticated(false);
+      setUsername("");
     }
   }, []);
+
+  // Check login status on mount and when storage changes
+  useEffect(() => {
+    // Initial check
+    checkAuth();
+    
+    // Set up event listener for storage events
+    const handleStorageChange = () => {
+      checkAuth();
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    // Also listen for our custom event
+    window.addEventListener('authChange', handleStorageChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('authChange', handleStorageChange);
+    };
+  }, [checkAuth]);
 
   const toggleMenu = () => {
     setMenuOpen(!menuOpen);
@@ -41,12 +72,18 @@ const App = () => {
   const handleLogout = () => {
     // Clear current user
     localStorage.removeItem("currentUser");
-    setLoggedIn(false);
+    
+    // Update state
+    setIsAuthenticated(false);
     setUsername("");
+    
     // Close menu on mobile if open
     if (menuOpen) {
       setMenuOpen(false);
     }
+    
+    // Dispatch event to notify other components
+    window.dispatchEvent(new Event('authChange'));
   };
 
   return (
@@ -64,7 +101,7 @@ const App = () => {
           
           <nav className={`main-nav ${menuOpen ? 'active' : ''}`}>
             <ul className="nav-links">
-              {loggedIn ? (
+              {isAuthenticated ? (
                 <>
                   <li>
                     <NavLink to="/" className={({isActive}) => isActive ? "active-link" : ""}>
@@ -147,11 +184,13 @@ const App = () => {
                 <CompanyList />
               </ProtectedRoute>
             } />
+            {/* Redirect to login by default if no route matches */}
+            <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
         </main>
         
         <footer className="footer">
-          <p>© {new Date().getFullYear()} Company Portal - All Rights Reserved</p>
+          <p>© {new Date().getFullYear()} Praveen BV's Company - All Rights Reserved</p>
         </footer>
       </div>
     </Router>

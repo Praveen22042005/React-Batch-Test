@@ -6,7 +6,16 @@ const Home = () => {
   const [deleteConfirm, setDeleteConfirm] = useState(null);
 
   useEffect(() => {
-    localStorage.clear();
+    // Preserve user login information by only clearing company data
+    // Remove existing company data from localStorage
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('company_')) {
+        localStorage.removeItem(key);
+      }
+    }
+    
+    // Store companies in localStorage
     companyData.forEach((company, index) => {
       localStorage.setItem(`company_${index}_id`, company.id);
       localStorage.setItem(`company_${index}_name`, company.companyName);
@@ -25,7 +34,15 @@ const Home = () => {
   };
 
   const updateLocalStorage = (updatedCompanies) => {
-    localStorage.clear();
+    // Remove existing company data from localStorage
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('company_')) {
+        localStorage.removeItem(key);
+      }
+    }
+    
+    // Store updated companies
     updatedCompanies.forEach((company, index) => {
       localStorage.setItem(`company_${index}_id`, company.id);
       localStorage.setItem(`company_${index}_name`, company.companyName);

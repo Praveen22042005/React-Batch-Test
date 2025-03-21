@@ -55,6 +55,9 @@ const Login = () => {
           isLoggedIn: true
         }));
         
+        // Trigger a custom event to notify the App component
+        window.dispatchEvent(new Event('storage'));
+        
         // Redirect to home page
         navigate("/");
       } else {
