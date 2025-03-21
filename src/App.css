@@ -557,3 +557,47 @@ body {
 .delete-confirm-row {
   animation: pulse 1.5s infinite;
 }
+
+.user-nav-item {
+  margin-left: auto;
+}
+
+.username {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: white;
+  font-weight: 500;
+  padding: 0.8rem 1rem;
+}
+
+.logout-btn {
+  color: white;
+  text-decoration: none;
+  padding: 0.8rem 1rem;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+.logout-btn:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+  .user-nav-item {
+    margin-left: 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+  }
+}
