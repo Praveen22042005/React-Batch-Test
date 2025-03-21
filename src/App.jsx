@@ -2,12 +2,14 @@ import React, { useState, useEffect, useCallback } from "react";
 import { BrowserRouter as Router, Routes, Route, NavLink, Navigate, useNavigate } from "react-router-dom";
 import "./App.css";
 import "./auth.css";
+import "./modern-forms.css";
+import "./company-list.css";
 import Home from "./Home";
 import Create from "./Create";
 import Edit from "./Edit";
 import Login from "./Login";
 import Signup from "./Signup";
-import CompanyList from "./MyArray";
+import CompanyList from "./CompanyList";
 
 // Protected route component
 const ProtectedRoute = ({ children }) => {

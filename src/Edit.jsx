@@ -19,7 +19,35 @@ const Edit = () => {
   // Load companies on component mount
   useEffect(() => {
     loadCompanies();
+    
+    // Check if a company was selected in the CompanyList view
+    const preselectedCompanyId = sessionStorage.getItem('selectedCompanyId');
+    if (preselectedCompanyId) {
+      setSelectedCompanyId(preselectedCompanyId);
+      sessionStorage.removeItem('selectedCompanyId'); // Clean up
+    }
   }, []);
+
+  // When selectedCompanyId changes, load the company data
+  useEffect(() => {
+    if (selectedCompanyId && companies.length > 0) {
+      const selectedCompany = companies.find(c => c.id.toString() === selectedCompanyId.toString());
+      if (selectedCompany) {
+        // Format date for input field (YYYY-MM-DD)
+        const formattedDate = selectedCompany.JDdate ? 
+          new Date(selectedCompany.JDdate).toISOString().split('T')[0] : "";
+          
+        setCompanyData({
+          companyName: selectedCompany.companyName || "",
+          companyCategory: selectedCompany.companyCategory || "Service Based",
+          domain: selectedCompany.domain || "",
+          JDdate: formattedDate,
+          description: selectedCompany.description || ""
+        });
+        setIsEditing(true);
+      }
+    }
+  }, [selectedCompanyId, companies]);
 
   // Load companies from localStorage
   const loadCompanies = () => {
@@ -35,23 +63,7 @@ const Edit = () => {
     const companyId = e.target.value;
     setSelectedCompanyId(companyId);
     
-    if (companyId) {
-      const selectedCompany = companies.find(c => c.id.toString() === companyId);
-      if (selectedCompany) {
-        // Format date for input field (YYYY-MM-DD)
-        const formattedDate = selectedCompany.JDdate ? 
-          new Date(selectedCompany.JDdate).toISOString().split('T')[0] : "";
-          
-        setCompanyData({
-          companyName: selectedCompany.companyName || "",
-          companyCategory: selectedCompany.companyCategory || "Service Based",
-          domain: selectedCompany.domain || "",
-          JDdate: formattedDate,
-          description: selectedCompany.description || ""
-        });
-        setIsEditing(true);
-      }
-    } else {
+    if (!companyId) {
       setIsEditing(false);
       setCompanyData({
         companyName: "",
